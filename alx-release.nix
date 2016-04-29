@@ -4,7 +4,7 @@ with lib;
 
 let
 
-  makeUpdateRelease = releaseName: mainJob:
+  makeUpdateRelease = type: releaseName: mainJob:
     { timers."update-${releaseName}" =
       { wantedBy = [ "timers.target" ];
         timerConfig.OnUnitInactiveSec = 600;
@@ -18,8 +18,8 @@ let
           script =
             ''
               source /etc/profile
-              cd /home/gall/projects/alx-hydra-tools
-              exec ./alx-release.pl http://hydra.net.switch.ch/job/${mainJob}/latest-finished
+              cd /home/gall/alx-hydra-tools
+              exec ./release.pl ${type} http://hydra.net.switch.ch/job/${mainJob}/latest-finished
             ''; # */
             serviceConfig.User = "gall";
         };
@@ -29,13 +29,14 @@ in
 
 {
   environment.systemPackages = with pkgs.perlPackages;
-      [ LWP LWPProtocolHttps ];
+      [ LWP LWPProtocolHttps FileSlurp];
       
   systemd =
     fold recursiveUpdate {}
-      [ (makeUpdateRelease "release-15.03" "ALX/release-15.09/release")
-        (makeUpdateRelease "release-16.03" "ALX/release-16.03/release")
-        (makeUpdateRelease "release-unstable" "ALX/release-unstable/release")
+      [ (makeUpdateRelease "ALX" "release-15.09" "ALX/release-15.09/upgradeCommand")
+        (makeUpdateRelease "ALX" "release-16.03" "ALX/release-16.03/upgradeCommand")
+        #(makeUpdateRelease "ALX" "release-unstable" "ALX/release-unstable/upgradeCommand")
+        (makeUpdateRelease "installer" "installer" "ALX/installer/nfsRootTarball")
       ];
 
 }

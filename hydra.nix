@@ -57,6 +57,10 @@ in
 	  root /data;
 	  autoindex on;
 	}
+	location /installer/ {
+	  root /data;
+	  autoindex on;
+	}
      }
    '';
   };
